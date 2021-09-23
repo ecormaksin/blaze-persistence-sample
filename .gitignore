@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### add ###
+/LOG_FILE_IS_UNDEFINED
+/dependencies.txt
+/blaze-persistence-sample*.log
