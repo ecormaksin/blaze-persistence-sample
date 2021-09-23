@@ -177,27 +177,41 @@ class JpaCatRepositoryTest {
 		entries.addAll(otherCats);
 		repository.saveAllAndFlush(entries);
 
-		CriteriaBuilder<Cat> cb = cbf.create(em, Cat.class);
+		CriteriaBuilder<Cat> cb;
+
+		cb = cbf.create(em, Cat.class);
 		List<Cat> cats = cb.getResultList();
 		assertNotNull(cats);
 		assertEquals(8, cats.size());
+
+		String processName = "Select cat all list for complicated query";
+		outputProcessStart(processName);
 		// @formatter:off
 		cats.stream().forEach(c -> {
 			log.info(c.toString());
 		});
 		// @formatter:on
+		outputProcessEnd(processName);
 
-//		// @formatter:off
-//		CriteriaBuilder<Cat> cb = cbf.create(em, Cat.class, "c")
-//				.where("c.age").betweenExpression("5").andExpression("10")
-//				.where("SIZE(c.kittens)").geExpression("2")
-//				.orderByAsc("c.name")
-//				.orderByAsc("c.id");
-//		// @formatter:on
-//
-//		List<Cat> results = cb.getResultList();
-//
-//		assertEquals(expected, results);
+		// @formatter:off
+		cb = cbf.create(em, Cat.class, "c")
+				.where("c.age").betweenExpression("5").andExpression("10")
+				.where("SIZE(c.kittens)").geExpression("2")
+				.orderByAsc("c.name")
+				.orderByAsc("c.id");
+		// @formatter:on
+
+		List<Cat> results = cb.getResultList();
+		assertEquals(expected, results);
+
+		processName = "Select matched cat list for complicated query";
+		outputProcessStart(processName);
+		// @formatter:off
+		results.stream().forEach(c -> {
+			log.info(c.toString());
+		});
+		// @formatter:on
+		outputProcessEnd(processName);
 	}
 
 	private void outputProcessStart(final String processName) {
