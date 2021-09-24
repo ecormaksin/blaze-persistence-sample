@@ -21,11 +21,12 @@ import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.CriteriaBuilderFactory;
 import com.example.blazepersistencesample.infrastructure.jpa.BlazePersistenceConfiguration;
 import com.example.blazepersistencesample.infrastructure.jpa.entity.Cat;
+import com.example.blazepersistencesample.infrastructure.jpa.utils.CatInitTestUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
 @DataJpaTest
-@Import(BlazePersistenceConfiguration.class)
+@Import(value = { BlazePersistenceConfiguration.class, CatInitTestUtil.class })
 @Slf4j
 class JpaCatRepositoryTest {
 
@@ -38,23 +39,24 @@ class JpaCatRepositoryTest {
 	@Autowired
 	private EntityManager em;
 
+	@Autowired
+	private CatInitTestUtil catInitTestUtil;
+
 	@BeforeEach
 	void setup() {
 
+		List<Cat> catsList = new ArrayList<>();
 		// @formatter:off
-		repository.saveAndFlush(
-				Cat.builder()
+		catsList.add(Cat.builder()
 					.name("フク")
 					.age(5)
-					.build()
-				);
-		repository.saveAndFlush(
-				Cat.builder()
-					.name("あかり")
-					.age(3)
-					.build()
-				);
+					.build());
+		catsList.add(Cat.builder()
+				.name("あかり")
+				.age(3)
+				.build());
 		// @formatter:on
+		repository.saveAllAndFlush(catsList);
 	}
 
 	@Test
@@ -153,23 +155,25 @@ class JpaCatRepositoryTest {
 
 		repository.deleteAll();
 
-		// // 年齢も仔猫の匹数も該当する
-		final Cat makino = Cat.builder().name("4－牧野歴君").age(5).kittens(2).build();
-		final Cat momiji = Cat.builder().name("3－椛").age(6).kittens(3).build();
-		final Cat kinako = Cat.builder().name("2－きなこ").age(9).kittens(3).build();
-		final Cat sakura = Cat.builder().name("1－さくら").age(10).kittens(2).build();
+		// 年齢も仔猫の匹数も該当する
+		// @formatter:off
+		final Cat makino = catInitTestUtil.initializeCat("3-牧野歴君", 5, 2);
+		final Cat kinako1 = catInitTestUtil.initializeCat("2-きなこ", 6, 3);
+		final Cat sakura = catInitTestUtil.initializeCat("1-さくら", 10, 2);
+		final Cat kinako2 = catInitTestUtil.initializeCat("2-きなこ", 9, 3);
+		// @formatter:on
 
-		final List<Cat> candidates = Arrays.asList(makino, momiji, kinako, sakura);
-		final List<Cat> expected = Arrays.asList(sakura, kinako, momiji, makino);
+		final List<Cat> candidates = Arrays.asList(makino, kinako1, sakura, kinako2);
+		final List<Cat> expected = Arrays.asList(sakura, kinako1, kinako2, makino);
 
 		// @formatter:off
 		final List<Cat> otherCats = Arrays.asList(
 				// 年齢のみ該当する
-				Cat.builder().name("碧").age(5).kittens(1).build() 
-				, Cat.builder().name("琥珀").age(10).kittens(0).build()
+				catInitTestUtil.initializeCat("碧", 5, 1) 
+				, catInitTestUtil.initializeCat("琥珀", 10, 0)
 				// 仔猫の匹数のみ該当する
-				, Cat.builder().name("くるみ").age(4).kittens(2).build() 
-				, Cat.builder().name("モカ").age(11).kittens(2).build()
+				, catInitTestUtil.initializeCat("くるみ", 4, 2) 
+				, catInitTestUtil.initializeCat("モカ", 11, 2)
 				);
 		// @formatter:on
 		List<Cat> entries = new ArrayList<>();
@@ -177,24 +181,8 @@ class JpaCatRepositoryTest {
 		entries.addAll(otherCats);
 		repository.saveAllAndFlush(entries);
 
-		CriteriaBuilder<Cat> cb;
-
-		cb = cbf.create(em, Cat.class);
-		List<Cat> cats = cb.getResultList();
-		assertNotNull(cats);
-		assertEquals(8, cats.size());
-
-		String processName = "Select cat all list for complicated query";
-		outputProcessStart(processName);
 		// @formatter:off
-		cats.stream().forEach(c -> {
-			log.info(c.toString());
-		});
-		// @formatter:on
-		outputProcessEnd(processName);
-
-		// @formatter:off
-		cb = cbf.create(em, Cat.class, "c")
+		CriteriaBuilder<Cat> cb = cbf.create(em, Cat.class, "c")
 				.where("c.age").betweenExpression("5").andExpression("10")
 				.where("SIZE(c.kittens)").geExpression("2")
 				.orderByAsc("c.name")
@@ -202,9 +190,10 @@ class JpaCatRepositoryTest {
 		// @formatter:on
 
 		List<Cat> results = cb.getResultList();
+		assertEquals(4, results.size());
 		assertEquals(expected, results);
 
-		processName = "Select matched cat list for complicated query";
+		final String processName = "Select matched cat list for complicated query";
 		outputProcessStart(processName);
 		// @formatter:off
 		results.stream().forEach(c -> {
@@ -215,17 +204,14 @@ class JpaCatRepositoryTest {
 	}
 
 	private void outputProcessStart(final String processName) {
-
 		outputProcessLabel(processName + " [Start]");
 	}
 
 	private void outputProcessEnd(final String processName) {
-
 		outputProcessLabel(processName + " [End]");
 	}
 
 	private void outputProcessLabel(final String processName) {
-
-		log.info("■ {}", processName);
+		log.info("■{}", processName);
 	}
 }
