@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public final class CatInitTestUtil {
+public final class CatTestUtil {
 
 	private final JpaCatRepository repository;
 
@@ -57,5 +57,22 @@ public final class CatInitTestUtil {
 		kittensList = repository.saveAllAndFlush(kittensList);
 
 		return new HashSet<Cat>(kittensList);
+	}
+
+	public void initializeNameOrderedList(final int maxSize) {
+
+		repository.deleteAll();
+		List<Cat> catsList = new ArrayList<>();
+		// @formatter:off
+		for (int i = 1; i <= maxSize; i++) {
+			catsList.add(
+				Cat.builder()
+					.name("Cat" + i)
+					.age(randomDataGenerator.nextInt(0, 38)) // 世界一の長生き猫は38歳3日 https://www.axa-direct.co.jp/pet/pet-ms/detail/4992/#:~:text=%E4%B8%96%E7%95%8C%E4%B8%80%E3%81%AE%E9%95%B7%E7%94%9F%E3%81%8D%E7%8C%AB,%E3%81%99%E3%82%8B%E3%81%A8%E3%81%AA%E3%82%93%E3%81%A8%E7%B4%84170%E6%AD%B3%EF%BC%81
+					.build()
+				);
+		}
+		// @formatter:on
+		repository.saveAllAndFlush(catsList);
 	}
 }

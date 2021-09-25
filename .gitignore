@@ -35,4 +35,4 @@ build/
 ### add ###
 /LOG_FILE_IS_UNDEFINED
 /dependencies.txt
-/blaze-persistence-sample*.log
+/blaze-persistence-sample*.log*
