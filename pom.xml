@@ -46,7 +46,6 @@
 		    <groupId>org.bgee.log4jdbc-log4j2</groupId>
 		    <artifactId>log4jdbc-log4j2-jdbc4.1</artifactId>
 		    <version>1.16</version>
-		    <type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>

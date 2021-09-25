@@ -1,9 +1,10 @@
-package com.example.blazepersistencesample.infrastructure.jpa.utils;
+package com.example.blazepersistencesample.infrastructure.jpa.utilities;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -16,28 +17,39 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public final class CatTestUtil {
+public final class CatTestUtility {
+
+	private final int AGE_MIN = 0;
+
+	/** 猫の最高齢 */
+	// 世界一の長生き猫は38歳3日
+	// https://www.axa-direct.co.jp/pet/pet-ms/detail/4992/#:~:text=%E4%B8%96%E7%95%8C%E4%B8%80%E3%81%AE%E9%95%B7%E7%94%9F%E3%81%8D%E7%8C%AB,%E3%81%99%E3%82%8B%E3%81%A8%E3%81%AA%E3%82%93%E3%81%A8%E7%B4%84170%E6%AD%B3%EF%BC%81
+	private final int AGE_MAX = 38;
 
 	private final JpaCatRepository repository;
 
 	private RandomDataGenerator randomDataGenerator = new RandomDataGenerator();
 
-	public Cat initializeCat(final String name, final int age, final int noOfKittens) {
+	public Cat initializeCat(final String name) {
+		return initializeCat(name, null, null);
+	}
+
+	public Cat initializeCat(final String name, final Integer age, final Integer noOfKittens) {
 
 		Set<Cat> kittens = initializeKittens(name, noOfKittens);
 
 		// @formatter:off
 		return Cat.builder()
 				.name(name)
-				.age(age)
+				.age(Objects.isNull(age) ? randomAge() : age)
 				.kittens(kittens)
 				.build();
 		// @formatter:on
 	}
 
-	private Set<Cat> initializeKittens(final String parentName, final int noOfKittens) {
+	private Set<Cat> initializeKittens(final String parentName, final Integer noOfKittens) {
 
-		if (noOfKittens <= 0) {
+		if (Objects.isNull(noOfKittens) || noOfKittens.intValue() <= 0) {
 			return Collections.emptySet();
 		}
 
@@ -68,11 +80,15 @@ public final class CatTestUtil {
 			catsList.add(
 				Cat.builder()
 					.name("Cat" + i)
-					.age(randomDataGenerator.nextInt(0, 38)) // 世界一の長生き猫は38歳3日 https://www.axa-direct.co.jp/pet/pet-ms/detail/4992/#:~:text=%E4%B8%96%E7%95%8C%E4%B8%80%E3%81%AE%E9%95%B7%E7%94%9F%E3%81%8D%E7%8C%AB,%E3%81%99%E3%82%8B%E3%81%A8%E3%81%AA%E3%82%93%E3%81%A8%E7%B4%84170%E6%AD%B3%EF%BC%81
+					.age(randomAge()) 
 					.build()
 				);
 		}
 		// @formatter:on
 		repository.saveAllAndFlush(catsList);
+	}
+
+	private Integer randomAge() {
+		return Integer.valueOf(randomDataGenerator.nextInt(AGE_MIN, AGE_MAX));
 	}
 }

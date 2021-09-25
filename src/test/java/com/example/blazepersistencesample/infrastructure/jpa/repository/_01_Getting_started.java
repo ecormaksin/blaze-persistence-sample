@@ -24,14 +24,15 @@ import org.springframework.context.annotation.Import;
 import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.CriteriaBuilderFactory;
 import com.blazebit.persistence.PagedList;
+import com.example.blazepersistencesample.TestLogUtility;
 import com.example.blazepersistencesample.infrastructure.jpa.BlazePersistenceConfiguration;
 import com.example.blazepersistencesample.infrastructure.jpa.entity.Cat;
-import com.example.blazepersistencesample.infrastructure.jpa.utils.CatTestUtil;
+import com.example.blazepersistencesample.infrastructure.jpa.utilities.CatTestUtility;
 
 import lombok.extern.slf4j.Slf4j;
 
 @DataJpaTest
-@Import(value = { BlazePersistenceConfiguration.class, CatTestUtil.class })
+@Import(value = { BlazePersistenceConfiguration.class, CatTestUtility.class })
 @Slf4j
 class _01_Getting_started {
 
@@ -47,7 +48,9 @@ class _01_Getting_started {
 	private EntityManager em;
 
 	@Autowired
-	private CatTestUtil catTestUtil;
+	private CatTestUtility catTestUtil;
+
+	private TestLogUtility testLogUtil = new TestLogUtility(log);
 
 	@BeforeEach
 	void setup() {
@@ -63,7 +66,7 @@ class _01_Getting_started {
 		assertCatListIsNotEmpty(cats);
 
 		final String processName = "Select cat list by JPA";
-		outputCatList(processName, cats);
+		testLogUtil.outputResultList(processName, cats);
 	}
 
 	@Test
@@ -76,7 +79,7 @@ class _01_Getting_started {
 		assertCatListIsNotEmpty(cats);
 
 		final String processName = "Select cat list by Blaze Persistence";
-		outputCatList(processName, cats);
+		testLogUtil.outputResultList(processName, cats);
 	}
 
 	private void assertCatListIsNotEmpty(final List<Cat> cats) {
@@ -99,7 +102,7 @@ class _01_Getting_started {
 		assertAgeListIsNotEmpty(ages);
 
 		final String processName = "Select cat age list without alias by Blaze Persistence";
-		outputAgeList(processName, ages);
+		testLogUtil.outputResultList(processName, ages);
 	}
 
 	@Test
@@ -117,7 +120,7 @@ class _01_Getting_started {
 		assertAgeListIsNotEmpty(ages);
 
 		final String processName = "Select cat age list with alias by Blaze Persistence";
-		outputAgeList(processName, ages);
+		testLogUtil.outputResultList(processName, ages);
 	}
 
 	private void assertAgeListIsNotEmpty(final List<Integer> ages) {
@@ -170,7 +173,7 @@ class _01_Getting_started {
 		assertEquals(expected, cats);
 
 		final String processName = "Select matched cat list for complicated query";
-		outputCatList(processName, cats);
+		testLogUtil.outputResultList(processName, cats);
 	}
 
 	@RepeatedTest(value = 3, name = "{displayName} {currentRepetition}/{totalRepetitions}")
@@ -213,7 +216,7 @@ class _01_Getting_started {
 		assertEquals(MAX_CATS_SIZE, cats.getTotalSize(), "`getTotalSize` equals total list size");
 
 		final String processName = "Select cat paging list by Blaze Persistence";
-		outputCatList(processName, cats);
+		testLogUtil.outputResultList(processName, cats);
 		log.info("cats.getFirstResult(): {}", cats.getFirstResult());
 		log.info("cats.getKeysetPage(): {}",
 				Objects.isNull(cats.getKeysetPage()) ? "not defined" : cats.getKeysetPage().toString());
@@ -222,39 +225,5 @@ class _01_Getting_started {
 		log.info("cats.getSize(): {}", cats.getSize());
 		log.info("cats.getTotalPages(): {}", cats.getTotalPages());
 		log.info("cats.getTotalSize(): {}", cats.getTotalSize());
-	}
-
-	private void outputCatList(final String processName, final List<Cat> cats) {
-
-		outputProcessStart(processName);
-		// @formatter:off
-		cats.stream().forEach(c -> {
-			log.info(c.toString());
-		});
-		// @formatter:on
-		outputProcessEnd(processName);
-	}
-
-	private void outputAgeList(final String processName, final List<Integer> ages) {
-
-		outputProcessStart(processName);
-		// @formatter:off
-		ages.stream().forEach(a -> {
-			log.info("age: {}", a);
-		});
-		// @formatter:on
-		outputProcessEnd(processName);
-	}
-
-	private void outputProcessStart(final String processName) {
-		outputProcessLabel(processName + " [Start]");
-	}
-
-	private void outputProcessEnd(final String processName) {
-		outputProcessLabel(processName + " [End]");
-	}
-
-	private void outputProcessLabel(final String processName) {
-		log.info("■{}", processName);
 	}
 }
