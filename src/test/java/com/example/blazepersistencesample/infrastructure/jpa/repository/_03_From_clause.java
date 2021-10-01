@@ -1,7 +1,9 @@
 package com.example.blazepersistencesample.infrastructure.jpa.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -99,4 +101,78 @@ class _03_From_clause {
 		// @formatter:on
 	}
 
+	@Test
+	@DisplayName("クエリー ルートに別名を付与できる`create`メソッドのオーバーロードを使うことにより、明示的にクエリー ルートを指定する（短縮版）")
+	void testGetCatListWithAliasedRootWithShorthand() {
+
+		final int arbitraryCatListSize = 10;
+		catTestUtil.initializeNameOrderedList(arbitraryCatListSize);
+
+		CriteriaBuilder<Cat> cb = cbf.create(em, Cat.class, "myCat");
+		final List<Cat> cats = cb.getResultList();
+
+		catTestUtil.assertResultListIsNotEmpty(cats);
+		assertEquals(arbitraryCatListSize, cats.size());
+
+		final String processName = "Select cat list with aliased query root with shorthand by Blaze Persistence";
+		testLogUtil.outputResultList(processName, cats);
+	}
+
+	@Test
+	@DisplayName("クエリー ルートに別名を付与できる`create`メソッドのオーバーロードを使うことにより、明示的にクエリー ルートを指定する（非短縮版）")
+	void testGetCatListWithAliasedRootWithoutShorthand() {
+
+		final int arbitraryCatListSize = 10;
+		catTestUtil.initializeNameOrderedList(arbitraryCatListSize);
+
+		// @formatter:off
+		CriteriaBuilder<Cat> cb = cbf.create(em, Cat.class)
+				.from(Cat.class, "myCat");
+		// @formatter:on
+
+		final List<Cat> cats = cb.getResultList();
+
+		catTestUtil.assertResultListIsNotEmpty(cats);
+		assertEquals(arbitraryCatListSize, cats.size());
+
+		final String processName = "Select cat list with aliased query root without shorthand by Blaze Persistence";
+		testLogUtil.outputResultList(processName, cats);
+	}
+
+	@Test
+	@DisplayName("相対パスの表現を使う（単一のルート エンティティのため、クエリー ルートの指定は不要）")
+	void testGetCatNameListWithRelativePath() {
+
+		final int arbitraryCatListSize = 10;
+		catTestUtil.initializeNameOrderedList(arbitraryCatListSize);
+
+		// @formatter:off
+		CriteriaBuilder<Cat> cb = cbf.create(em, Cat.class, "myCat")
+				.select("name");
+		// @formatter:on
+
+		final List<Cat> cats = cb.getResultList();
+
+		catTestUtil.assertResultListIsNotEmpty(cats);
+		assertEquals(arbitraryCatListSize, cats.size());
+
+		final String processName = "Select cat list with relative path by Blaze Persistence";
+		testLogUtil.outputResultList(processName, cats);
+	}
+
+	@Test
+	@DisplayName("複数のクエリー ルートを使用している時に、相対パスを使うと例外が発生する")
+	void testThownExceptionWhenUsingRelativePathWithMultipleQueryRoots() {
+
+		// @formatter:off
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+			CriteriaBuilder<String> cb = cbf.create(em, String.class)
+					.from(Cat.class, "c")
+					.from(Person.class, "p")
+					.select("name");
+			List<String> cats = cb.getResultList();
+		});
+		// @formatter:on
+		log.info("★exception: {}", exception.toString());
+	}
 }

@@ -1,7 +1,6 @@
 package com.example.blazepersistencesample.infrastructure.jpa.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
@@ -63,7 +62,7 @@ class _01_Getting_started {
 
 		final List<Cat> cats = repository.findAll();
 
-		assertCatListIsNotEmpty(cats);
+		catTestUtil.assertResultListIsNotEmpty(cats);
 
 		final String processName = "Select cat list by JPA";
 		testLogUtil.outputResultList(processName, cats);
@@ -76,15 +75,10 @@ class _01_Getting_started {
 		CriteriaBuilder<Cat> cb = cbf.create(em, Cat.class);
 		final List<Cat> cats = cb.getResultList();
 
-		assertCatListIsNotEmpty(cats);
+		catTestUtil.assertResultListIsNotEmpty(cats);
 
 		final String processName = "Select cat list by Blaze Persistence";
 		testLogUtil.outputResultList(processName, cats);
-	}
-
-	private void assertCatListIsNotEmpty(final List<Cat> cats) {
-		assertNotNull(cats);
-		assertFalse(cats.isEmpty());
 	}
 
 	@Test
@@ -99,7 +93,7 @@ class _01_Getting_started {
 
 		final List<Integer> ages = cb.getResultList();
 
-		assertAgeListIsNotEmpty(ages);
+		catTestUtil.assertResultListIsNotEmpty(ages);
 
 		final String processName = "Select cat age list without alias by Blaze Persistence";
 		testLogUtil.outputResultList(processName, ages);
@@ -117,15 +111,10 @@ class _01_Getting_started {
 
 		final List<Integer> ages = cb.getResultList();
 
-		assertAgeListIsNotEmpty(ages);
+		catTestUtil.assertResultListIsNotEmpty(ages);
 
 		final String processName = "Select cat age list with alias by Blaze Persistence";
 		testLogUtil.outputResultList(processName, ages);
-	}
-
-	private void assertAgeListIsNotEmpty(final List<Integer> ages) {
-		assertNotNull(ages);
-		assertFalse(ages.isEmpty());
 	}
 
 	@Test

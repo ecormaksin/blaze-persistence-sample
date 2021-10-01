@@ -1,5 +1,8 @@
 package com.example.blazepersistencesample.infrastructure.jpa.utilities;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -91,4 +94,10 @@ public final class CatTestUtility {
 	private Integer randomAge() {
 		return Integer.valueOf(randomDataGenerator.nextInt(AGE_MIN, AGE_MAX));
 	}
+
+	public void assertResultListIsNotEmpty(final List<?> resultList) {
+		assertNotNull(resultList);
+		assertFalse(resultList.isEmpty());
+	}
+
 }
